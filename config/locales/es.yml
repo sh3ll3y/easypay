@@ -1,0 +1,35 @@
+es:
+  devise:
+    sessions:
+        user:
+          signed_out: "Sesión cerrada correctamente"
+          signed_in: "Sesión iniciada correctamente"
+        signed_out: "Sesión cerrada correctamente"
+        signed_in: "Sesión iniciada correctamente"
+  menu:
+    home: "Inicio"
+    about: "Acerca de"
+    contact: "Contacto"
+  buttons:
+    submit: "Enviar"
+    cancel: "Cancelar"
+    edit: "Editar"
+    delete: "Eliminar"
+    avl_credits: 'Créditos Disponibles'
+    my_txns: 'Mis Transacciones'
+    my_downd: 'Mis Descargas'
+    edit_prof: 'Editar Perfil'
+    sign_out: 'Cerrar Sesión'
+    sign_in: 'Iniciar Sesión'
+    sign_up: 'Registrarse'
+    downd_txns: 'Descargar Transacciones'
+    download: 'Descargar'
+    recharge: 'Recargar'
+    back: 'Volver'
+    generate_bill: 'Generate Bill'
+
+  language:
+    name: "Español"
+    select: "Seleccionar Idioma"
+  custom:
+    call_to_action: "¡Elige tu Proveedor de Recarga Móvil!"

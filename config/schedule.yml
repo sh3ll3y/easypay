@@ -1,0 +1,4 @@
+pending_transaction_processor:
+  cron: "*/1 * * * *"  # Runs every minute
+  class: "PendingTransactionProcessorWorker"
+  description: "Processes pending transactions and assigns status after 5 minutes"

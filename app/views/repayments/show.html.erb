@@ -1,0 +1,14 @@
+<div class="container mt-4">
+  <h1>Repayment Details</h1>
+
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Repayment for Bill #<%= @repayment.bill.id %></h5>
+      <p class="card-text"><strong>Date:</strong> <%= @repayment.created_at.strftime('%B %d, %Y') %></p>
+      <p class="card-text"><strong>Repayment Amount:</strong> <%= number_to_currency(@repayment.bill.bill_amount) %></p>
+      <p class="card-text"><strong>Bill Amount:</strong> <%= number_to_currency(@repayment.bill.bill_amount) %></p>
+      <p class="card-text"><strong>Payment Method:</strong> <%= @repayment.payment_method.capitalize %></p>
+      <%= link_to 'Back to Repayments', repayments_path, class: 'btn btn-secondary' %>
+    </div>
+  </div>
+</div>

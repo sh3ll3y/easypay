@@ -1,0 +1,22 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    digest-crc (0.6.5)
+      rake (>= 12.0.0, < 14.0.0)
+    mysql2 (0.5.6)
+    rake (13.2.1)
+    ruby-kafka (1.5.0)
+      digest-crc
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  mysql2
+  ruby-kafka
+
+RUBY VERSION
+   ruby 2.6.9p207
+
+BUNDLED WITH
+   1.17.2

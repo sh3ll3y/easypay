@@ -1,0 +1,59 @@
+<nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #dc3545;">
+  <div class="container-fluid">
+    <button class="navbar-toggler order-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <a class="navbar-brand mx-auto order-1 order-lg-0 flex-grow-1 text-center" href="/">
+      <h1 class="mb-0">Easypay</h1>
+    </a>
+    
+    <div class="collapse navbar-collapse order-2" id="navbarNav">
+      <ul class="navbar-nav ms-auto align-items-center">
+          <% if user_signed_in? %>
+            <% if user_signed_in? && current_user.admin? %>
+             <li class="nav-item me-4 align-items-center d-flex">
+             <%= link_to "Admin Dashboard", admin_dashboard_path, class: "nav-link" %>
+             </li>
+            <% end %>
+          <li class="nav-item me-4">
+           <% if current_user&.admin? %>
+            <%= link_to 'Sidekiq Dashboard', sidekiq_web_path, class:"nav-link"%>
+           <% end %>
+           </li>
+           <li class="nav-item me-4">
+        <span class="navbar-text">
+          <%= t('buttons.avl_credits') %>: <span class="fs-5 fw-bold">₹<%= number_with_precision(current_user.credit, precision: 2) %></span>
+        </span>
+      </li>
+          <li class="nav-item me-4">
+            <%= link_to "My Bills", bills_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item me-4">
+            <%= link_to "My Repayments", repayments_path, class: "nav-link" %>
+          </li>
+
+          <li class="nav-item me-4">
+            <%= link_to t('buttons.my_txns'), my_transactions_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item me-4">
+          <%= link_to t('buttons.my_downd'), downloads_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item" me-4>
+            <%= link_to t('buttons.edit_prof'), edit_user_registration_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item" me-4>
+            <%= link_to t('buttons.sign_out'), destroy_user_session_path, method: :delete, class: "nav-link" %>
+          </li>
+        <% else %>
+          <li class="nav-item">
+            <%= link_to t('buttons.sign_up'), new_user_registration_path, class: "nav-link" %>
+          </li>
+          <li class="nav-item">
+            <%= link_to t('buttons.sign_in'), new_user_session_path, class: "nav-link" %>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</nav>

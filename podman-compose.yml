@@ -1,0 +1,192 @@
+version: "3.9"
+services:
+  mysql-db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: easypay
+      MYSQL_ROOT_PASSWORD: ""
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+
+  redis-cache:
+    image: redis:6.2
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+
+  rails-app:
+    image: ruby:2.6.9
+    env-file:
+      - .env
+    working_dir: /usr/src/app
+    command: >
+      ./load_env.sh sh -c "
+        rm -f tmp/pids/server.pid &&
+        apt-get update &&
+        curl -fsSL https://deb.nodesource.com/setup_14.x | bash - &&
+        apt-get install -y nodejs &&
+        npm install -g yarn &&
+        yarn add @babel/plugin-proposal-private-methods --dev &&
+        yarn add @babel/plugin-proposal-private-property-in-object --dev &&
+        gem install bundler -v 2.4.22 &&
+        bundle install &&
+        yarn install --check-files &&
+        bundle exec rails webpacker:compile &&
+        rails db:prepare &&
+        rails db:migrate &&
+        bundle exec rails server -b 0.0.0.0 -p 3000"
+    environment:
+      RAILS_ENV: development
+      DATABASE_HOST: mysql-db
+      REDIS_HOST: redis-cache
+      MYSQL_DATABASE: easypay
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ""
+      MYSQL_ROOT_PASSWORD: ""
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    volumes:
+      - .:/usr/src/app:Z
+      - bundle:/usr/local/bundle
+      - node_modules:/usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mysql-db
+      - redis-cache
+      - elasticsearch
+    networks:
+      - app_network
+
+  sidekiq:
+    image: ruby:2.6.9  # or whatever version you're using
+    command: >
+      ./load_env.sh bash -c "
+        apt-get update && 
+        gem install bundler:2.4.22 &&
+        apt-get install -y build-essential libffi-dev &&
+        bundle install &&
+        bundle exec sidekiq
+      "
+    volumes:
+      - .:/usr/src/app:Z
+    environment:
+      RAILS_ENV: development
+      REDIS_HOST: redis-cache
+      DATABASE_HOST: mysql-db
+      MYSQL_DATABASE: easypay
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ""
+      MYSQL_ROOT_PASSWORD: ""
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+
+
+    depends_on:
+      - redis-cache
+    working_dir: /usr/src/app
+  
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.14.0
+    environment:
+      - discovery.type=single-node
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.14.0
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "5044:5044"
+    depends_on:
+      - elasticsearch
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.14.0
+    ports:
+      - "5601:5601"
+    environment:
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+    depends_on:
+      - elasticsearch
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  kafka_consumer:
+    image: ruby:2.6.9
+    depends_on:
+      - kafka
+      - mysql-db
+    volumes:
+      - ./kafka_consumer:/app
+    working_dir: /app
+    command: bash -c "bundle install && ruby create_analytics_db.rb && ruby setup_db.rb && ruby kafka_consumer.rb"
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      DATABASE_HOST: mysql-db
+      MYSQL_DATABASE: analytics_db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: ""
+      RAILS_ENV: development
+
+  notification_service:
+    image: ruby:3.0-slim
+    volumes:
+      - ./notification_service:/app
+    working_dir: /app
+    ports:
+      - "4567:4567"
+    environment:
+      KAFKA_BROKERS: kafka:29092
+      KAFKA_TOPIC: notification_events
+    depends_on:
+      - kafka
+    command: >
+      bash -c "
+        apt-get update && 
+        apt-get install -y build-essential libssl-dev &&
+        gem install bundler &&
+        bundle install &&
+        ruby /app/app.rb
+      "
+
+networks:
+  app_network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
+  bundle:
+  node_modules:
+  elasticsearch_data:
+    driver: local

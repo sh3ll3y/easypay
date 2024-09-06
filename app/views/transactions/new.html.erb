@@ -1,0 +1,31 @@
+<div class="container mt-5">
+  <h1>Recharge for ₹<%= @amount %></h1>
+  <p><strong>Plan Details:</strong> <%= @details %></p>
+
+  <%= form_with(model: [@biller, @transaction], local: true) do |form| %>
+    <% if @transaction.errors.any? %>
+      <div class="alert alert-danger">
+        <h2><%= pluralize(@transaction.errors.count, "error") %> prohibited this transaction from being saved:</h2>
+        <ul>
+          <% @transaction.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="mb-3">
+      <%= form.label :mobile_number, class: "form-label" %>
+      <%= form.text_field :mobile_number, class: "form-control" %>
+    </div>
+
+    <%= form.hidden_field :amount, value: @amount %>
+    <%= form.hidden_field :plan, value: { amount: @amount, details: @details }.to_json %>
+
+    <div class="mb-3">
+      <%= form.submit "Confirm Recharge", class: "btn btn-primary" %>
+      <%= link_to "Cancel", biller_path(@biller), class: "btn btn-secondary" %>
+    </div>
+  <% end %>
+</div>
+

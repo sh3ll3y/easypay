@@ -1,0 +1,64 @@
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center">
+    <h1><%= t('buttons.my_txns') %></h1>
+    <%= button_to t('buttons.downd_txns'), downloads_path, method: :post, class: "btn btn-primary" %>
+  </div>
+  <br/>
+  <%= form_with(url: my_transactions_path, method: :get, local: true, class: 'mb-4', id: 'search-form') do |f| %>
+    <div class="input-group">
+      <%= f.text_field :query, value: params[:query], placeholder: "Search by mobile number or biller name", class: "form-control", id: "search-input" %>
+      <div class="input-group-append">
+        <%= f.submit "Search", class: "btn btn-primary" %>
+        <%= link_to "Reset", my_transactions_path, class: "btn btn-secondary ml-2", id: "reset-button" %>
+      </div>
+    </div>
+  <% end %>
+  
+  <div id="transactions-table">
+    <%= render partial: 'transactions_table', locals: { transactions: @transactions } %>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const searchInput = document.getElementById('search-input');
+  const searchForm = document.getElementById('search-form');
+  const resetButton = document.getElementById('reset-button');
+  const transactionsTable = document.getElementById('transactions-table');
+
+  let debounceTimer;
+
+  searchInput.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(function() {
+      const searchTerm = searchInput.value;
+      if (searchTerm.length > 2) {
+        fetchResults(searchTerm);
+      }
+    }, 300);
+  });
+
+  resetButton.addEventListener('click', function(e) {
+    e.preventDefault();
+    searchInput.value = '';
+    fetchResults('');
+  });
+
+  function fetchResults(query) {
+    const url = new URL(searchForm.action);
+    url.searchParams.set('query', query);
+
+    fetch(url, {
+      headers: {
+        'Accept': 'text/javascript',
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => response.text())
+    .then(html => {
+      transactionsTable.innerHTML = html;
+    })
+    .catch(error => console.error('Error:', error));
+  }
+});
+</script>

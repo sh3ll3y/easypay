@@ -1,0 +1,6 @@
+<%= form_tag(language_update_path, method: :post, class: 'language-switcher') do %>
+  <%= select_tag :language, 
+                 options_for_select([['English', 'en'], ['Español', 'es']], I18n.locale),
+                 onchange: 'this.form.submit()',
+                 'aria-label': t('language.select') %>
+<% end %>

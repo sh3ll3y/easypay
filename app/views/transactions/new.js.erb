@@ -1,0 +1,2 @@
+document.getElementById('transaction-form-modal').querySelector('.modal-content').innerHTML = "<%= j render 'form', biller: @biller, transaction: @transaction, amount: @amount, details: @details %>";
+new bootstrap.Modal(document.getElementById('transaction-form-modal')).show();

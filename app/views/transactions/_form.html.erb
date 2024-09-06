@@ -1,0 +1,19 @@
+<%= form_with(model: [@biller, @transaction], local: false) do |form| %>
+  <div class="modal-header">
+    <h5 class="modal-title">Recharge for ₹<%= params[:amount] %></h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <div class="modal-body">
+    <p><strong>Plan Details:</strong> <%= params[:details] %></p>
+    <div class="mb-3">
+      <%= form.label :mobile_number, class: "form-label" %>
+      <%= form.text_field :mobile_number, class: "form-control" %>
+    </div>
+    <%= form.hidden_field :amount, value: params[:amount] %>
+    <%= form.hidden_field :plan, value: { amount: params[:amount], details: params[:details] }.to_json %>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    <%= form.submit "Confirm Recharge", class: "btn btn-primary" %>
+  </div>
+<% end %>

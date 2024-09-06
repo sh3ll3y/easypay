@@ -1,0 +1,32 @@
+<div class="container mt-4">
+  <h1>My Repayments</h1>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Amount</th>
+        <th>Payment Method</th>
+        <th>Bill</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @repayments.each do |repayment| %>
+        <tr>
+          <td><%= repayment.created_at.strftime('%B %d, %Y') %></td>
+          <td><%= number_to_currency(repayment.bill.bill_amount) %></td>
+          <td><%= repayment.payment_method.capitalize %></td>
+          <td><%= link_to "Bill ##{repayment.bill.id}", bill_path(repayment.bill) %></td>
+          <td>
+            <%= link_to 'View', repayment_path(repayment), class: 'btn btn-sm btn-info' %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-center">
+    <%= paginate @repayments %>
+  </div>
+</div>

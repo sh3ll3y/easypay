@@ -1,0 +1,25 @@
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Transaction ID</th>
+      <th>Biller</th>
+      <th>Mobile No.</th>
+      <th>Amount</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% transactions.each do |transaction| %>
+      <tr>
+        <td><%= transaction.txn_id %></td>
+        <td><%= transaction.biller.name %></td>
+        <td><%= transaction.mobile_number %></td>
+        <td>₹<%= number_with_precision(transaction.amount, precision: 2) %></td>
+        <td><%= transaction.status.capitalize %></td>
+        <td><%= transaction.created_at.strftime("%B %d, %Y %H:%M") %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+<%= paginate transactions %>
