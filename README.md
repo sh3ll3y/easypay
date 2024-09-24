@@ -30,7 +30,7 @@ Before setting up the project locally, ensure you have the following installed:
 2. **Create the required configuration files**:
     In the root folder of the project (beside the `podman-compose.yml` file), create the following two files:
 
-    - **`.env`** file:
+    - **`.env`** file (This is not required if you are using aws_config.yml. You can use this to add other env vars if need be):
         ```bash
         touch .env
         ```
